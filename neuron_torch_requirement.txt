@@ -1,0 +1,5 @@
+
+psutil
+
+--extra-index-url https://pip.repos.neuron.amazonaws.com
+torch-neuron==1.7.1.1.2.16.0 # implicitly installs numpy and torch
