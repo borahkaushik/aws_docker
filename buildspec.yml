@@ -1,20 +1,56 @@
 version: 0.2
 
+#env:
+  #variables:
+     # key: "There are no variables"
+  #parameter-store:
+     # key: "There are no variables"
+
 phases:
+  install:
+    #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
+    #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
+    runtime-versions:
+       docker: 20.10
+    commands:
+#      - apt-get update
+#      - sudo apt install -y python3-pip
+#      - pip install --upgrade pip
+#      - sudo apt-get install -y  libxml2-dev libxslt-dev python-dev
+     - docker --version
+#      - python --version
+#      - python -c "import struct;print( 8 * struct.calcsize('P'))"
+     - docker ps
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - docker --version
-      - sudo dockerd
+       - sudo dockerd
+#       - echo "pre-build stage started"
+#       - echo "installing requirments.txt"
+#       - cat requirements.txt  | xargs -L 1 python3 -m pip install
+#       - echo "requirments.txt installed successfully"
+#       - echo "installing neuron_torch_requirement.txt"
+#       - python3 -m pip install -r neuron_torch_requirement.txt
+#       - echo "neuron_torch_requirement.txt installed successfully"
+#       - echo "pre-build stage finished"
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...          
-      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
+      - echo "build stage"
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo "post-build stage"
+  # build:
+  #   commands:
+  #     - pytest tests/unit/
+  #     - pytest tests/integration/ -rfs
+  # post_build:
+  #   commands:
+  #     - python setup.py sdist bdist_wheel
+artifacts:
+  files:
+    - '**/*'
+  #name: $(date +%Y-%m-%d)
+  #discard-paths: yes
+  #base-directory: location
+#cache:
+  #paths:
+    # - We don't currently cache anything
