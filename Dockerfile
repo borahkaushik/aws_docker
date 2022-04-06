@@ -10,11 +10,11 @@ RUN python3.7 -m pip install pip==21.0.1
 RUN apt install -y libpython3.7-dev
 
 # Requirement for app requirement
-COPY embedder/requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN cat /app/requirements.txt | xargs -L 1 python3.7 -m pip install
 
 # Requirement specific for neuron containers
-COPY embedder/neuron_torch_requirement.txt /app/neuron_torch_requirement.txt
+COPY neuron_torch_requirement.txt /app/neuron_torch_requirement.txt
 RUN python3.7 -m pip install -r /app/neuron_torch_requirement.txt
 
 COPY main_container/ /app/
