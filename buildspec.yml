@@ -7,51 +7,33 @@ version: 0.2
      # key: "There are no variables"
 
 phases:
-#   install:
-#     #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
-#     #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
-#     runtime-versions:
-#        docker: 20.10
-#     commands:
-#      - apt-get update
-#      - sudo apt install -y python3-pip
-#      - pip install --upgrade pip
-#      - sudo apt-get install -y  libxml2-dev libxslt-dev python-dev
-#      - docker --version
-#      - python --version
-#      - python -c "import struct;print( 8 * struct.calcsize('P'))"
-#      - docker ps
-  pre_build:
-    commands:
-       - docker --version
-       - sudo dockerd
-#       - echo "pre-build stage started"
-#       - echo "installing requirments.txt"
-#       - cat requirements.txt  | xargs -L 1 python3 -m pip install
-#       - echo "requirments.txt installed successfully"
-#       - echo "installing neuron_torch_requirement.txt"
-#       - python3 -m pip install -r neuron_torch_requirement.txt
-#       - echo "neuron_torch_requirement.txt installed successfully"
-#       - echo "pre-build stage finished"
-  build:
-    commands:
-      - echo "build stage"
-  post_build:
-    commands:
-      - echo "post-build stage"
-  # build:
-  #   commands:
-  #     - pytest tests/unit/
-  #     - pytest tests/integration/ -rfs
-  # post_build:
-  #   commands:
-  #     - python setup.py sdist bdist_wheel
+  pre_build: 
+    commands: 
+    - echo Logging in to Amazon ECR.... 
+    - aws --version
+    # update the following line with your own region
+    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+    - IMAGE_TAG=${COMMIT_HASH:=latest}
+    - REPOSITORY_URI=209656230012.dkr.ecr.us-east-1.amazonaws.com/mlstack.automation_test 
+  build: 
+    commands: 
+    - echo Build started on `date` 
+    - echo Building the Docker image... 
+    # update the following line with the name of your own ECR repository
+    - docker build -t $REPOSITORY_URI:latest .
+    # update the following line with the URI of your own ECR repository (view the Push Commands in the console)
+    - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG 
+  post_build: 
+    commands: 
+    - echo Build completed on `date` 
+    - echo pushing to repo
+    # update the following line with the URI of your own ECR repository
+    - docker push $REPOSITORY_URI:latest
+    - docker push $REPOSITORY_URI:$IMAGE_TAG
+    - echo Writing image definitions file... 
+    #- printf '[{"ImageURI":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+    - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
 artifacts:
   files:
-    - '**/*'
-  #name: $(date +%Y-%m-%d)
-  #discard-paths: yes
-  #base-directory: location
-#cache:
-  #paths:
-    # - We don't currently cache anything
+    - imageDetail.json
