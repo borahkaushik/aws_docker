@@ -7,24 +7,18 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 209656230012.dkr.ecr.us-east-1.amazonaws.com
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image... 
-      - ls
-      - printf '{"ImageURI":"%s"}' $IMAGE_REPO_NAME:$IMAGE_TAG
-#       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-#       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
-#   post_build:
-#     commands:
-#       - echo Build completed on `date`
-#       - echo Pushing the Docker image...
-#       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-#       - echo Writing image definitions file... 
-#       - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
-# artifacts:
-#   files:
-#     - imageDetail.json
+      - docker build -t dkrimg:latest .
+      - docker tag dkrimg:latest 209656230012.dkr.ecr.us-east-1.amazonaws.com/ml_prod_embedder:latest  
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push 209656230012.dkr.ecr.us-east-1.amazonaws.com/ml_prod_embedder:latest
+      - echo Writing image definitions file... 
