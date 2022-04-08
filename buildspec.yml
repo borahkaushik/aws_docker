@@ -11,7 +11,7 @@ phases:
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
       - TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-#       - curl --head -H "'Authorization: Bearer $TOKEN'" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep RateLimit
+      - curl --head -H "'Authorization: Bearer $TOKEN'" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1
   build:
     commands:
       - echo Build started on `date`
